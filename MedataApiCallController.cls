@@ -1,6 +1,6 @@
-global without sharing class FloMedataApiCallController {
+global without sharing class MedataApiCallController {
 
-public FloMedataApiCallController() {
+public MedataApiCallController() {
 }
 
 @RemoteAction
@@ -8,13 +8,13 @@ global static String addValueToGlobalPicklist(){
 
     String result = '0';
     try {
-        FloMetadataService.MetadataPort service = FloUtils.createService(UserInfo.getSessionId());
-        FloMetadataService.GlobalPicklist globalPickList = (FloMetadataService.GlobalPicklist) service.readMetadata('GlobalPicklist',new String[] { 'FLODocs__FLO_Change_Type'}).getRecords()[0];
+        MetadataService.MetadataPort service = Utils.createService(UserInfo.getSessionId());
+        MetadataService.GlobalPicklist globalPickList = (MetadataService.GlobalPicklist) service.readMetadata('GlobalPicklist',new String[] { 'FLODocs__FLO_Change_Type'}).getRecords()[0];
         Boolean existValue = false;
         String 	itemToVerify = 'Jira';
         system.debug('Picklist FullName: ' + globalPickList.fullname);
         if(globalPickList.globalPicklistValues != null){
-            for(FloMetadataService.PicklistValue itm : globalPickList.globalPicklistValues){
+            for(MetadataService.PicklistValue itm : globalPickList.globalPicklistValues){
                 if(itm.fullname == itemToVerify){
                     existValue = true;
                     result = '-1';
@@ -24,29 +24,26 @@ global static String addValueToGlobalPicklist(){
             system.debug('Exist Jira Item: ' + existValue);
             
             if(!existValue){
-                FloMetadataService.PicklistValue picklistValue = new FloMetadataService.PicklistValue();
+                MetadataService.PicklistValue picklistValue = new MetadataService.PicklistValue();
                 picklistValue.fullName = itemToVerify;
                 picklistValue.isActive = true;
                 picklistValue.default_x = false;
                 picklistValue.description = itemToVerify;
                 globalPickList.globalPicklistValues.add(picklistValue);
                 system.debug('Next Step Add picklistvalue');
-                List<FloMetadataService.SaveResult> results = service.updateMetadata(new FloMetadataService.Metadata[] { globalPickList });
+                List<MetadataService.SaveResult> results = service.updateMetadata(new MetadataService.Metadata[] { globalPickList });
                 result = '1';
             }
         }
     } catch(Exception e) {
 
     }
-    FloUtils.AddPicklistValuesLCB();
-    FloUtils.AddPicklistValuesDLUStatus();
-    //SF-1090
-	Floutils.AddPicklistValuesPermissionGroup();
-	Floutils.createPSGPostInstall();
-    //SF-1090
-    //SF-1201
+    Utils.AddPicklistValuesLCB();
+    Utils.AddPicklistValuesDLUStatus();
+	utils.AddPicklistValuesPermissionGroup();
+	utils.createPSGPostInstall();
 	if(!Test.isRunningTest()){
-		FloUtils.updateEmailTemplateEnvComp();
+		Utils.updateEmailTemplateEnvComp();
   }
   //SF-1201
     return result;
